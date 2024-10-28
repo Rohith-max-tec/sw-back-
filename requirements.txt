@@ -1,0 +1,17 @@
+Flask
+Flask-Cors
+joblib
+numpy
+librosa
+scipy
+scikit-learn
+sounddevice
+soundfile
+pandas
+gunicorn
+pymongo
+tensorflow==2.17.0
+facenet_pytorch
+torch
+torchvision
+opencv-python-headless
