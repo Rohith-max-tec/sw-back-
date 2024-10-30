@@ -17,6 +17,15 @@ import tensorflow as tf
 from io import BytesIO
 import base64
 
+
+import smtplib
+import random
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+from datetime import datetime, timedelta
+
+
+
 # Initialize the app and setup CORS
 app = Flask(__name__)
 CORS(app, supports_credentials=True)
@@ -54,6 +63,7 @@ df2['indicator'] = df2['total_crime_against_women'].apply(crime_indicator)
 client = MongoClient("mongodb+srv://rh0665971:q7DFaWad4RKQRiWg@cluster0.gusg4.mongodb.net/?retryWrites=true&w=majority&ssl=true&ssl_cert_reqs=CERT_NONE")
 db = client['swaraksha']
 users_collection = db['users']
+otp_collection = db['otp_storage']  
 messages_collection = db['messages']
 
 # Setup the uploads folder
@@ -287,9 +297,8 @@ def send_sos2():
     
     return jsonify({"status": "SOS sent with image!"})
 
-# Route for user registration
-@app.route('/register', methods=['GET', 'POST'])
-def register():
+@app.route('/get_otp', methods=['GET', 'POST'])
+def get_otp():
     if request.method == 'POST':
         username = request.form.get('username')
         mobile = request.form.get('mobile')
@@ -298,12 +307,85 @@ def register():
 
         if not username or not email or not password:
             flash('All fields are required!')
-            return redirect('register')
+            return redirect(url_for('register'))
+
+        # Check if email already exists
+        if users_collection.find_one({'email': email}):
+            return jsonify({'success': False, 'message': 'Email already exists! Please log in.'})
+
+        # Generate and store OTP
+        otp=send_otp(email)
+        if otp is None:
+            return jsonify({'success': False, 'message': 'Failed to send OTP. Please try again.'})
+        else:
+            return jsonify({'success': True, 'message': 'OTP sent to your Email.Please check'})
+
+def send_otp(email):
+    otp = random.randint(100000, 999999)  # Generate a 6-digit OTP
+    message = f"Your OTP for Swaraksha registration is: {otp}"
+
+    # Email setup
+    sender_email = "rh0665971@gmail.com"
+    sender_password = "jgjr aysx ndto bxye"  # Ensure this is a Google App password
+
+    # Create the email message
+    msg = MIMEMultipart()
+    msg['From'] = sender_email
+    msg['To'] = email
+    msg['Subject'] = "OTP for Swaraksha Registration"
+    msg.attach(MIMEText(message, 'plain'))
+
+    try:
+        # Send email using SMTP
+        with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
+            server.login(sender_email, sender_password)
+            server.sendmail(sender_email, email, msg.as_string())
+
+        # Store OTP in MongoDB with an expiration time of 5 minutes
+        otp_data = {
+            "email": email,
+            "otp": otp,
+            "created_at": datetime.now(),
+            "expires_at": datetime.now() + timedelta(minutes=5)
+        }
+        otp_collection.insert_one(otp_data)
+        logging.info("OTP sent and saved successfully.")
+        return otp  # Return the OTP if successfully sent
+
+    except smtplib.SMTPException as e:
+        logging.error(f"Failed to send OTP: {e}")
+        return None  # Return None to indicate failure
+
+
+# Route for user registration
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    if request.method == 'POST':
+        username = request.form.get('username')
+        mobile = request.form.get('mobile')
+        email = request.form.get('email')
+        password = request.form.get('password')
+        otp = request.form.get('otp')
+
+        if not username or not email or not password:
+            flash('All fields are required!')
+            return redirect(url_for('register'))
 
         # Check if email already exists
         if users_collection.find_one({'email': email}):
             flash('Email already exists! Please log in.')
             return jsonify({'success': True, 'message': 'Email already exists! Please log in.'})
+
+        otp_data = otp_collection.find_one({"email": email})
+
+         # Check if otp_data is None
+        if otp_data is None:
+            flash('No OTP found for this email. Please request a new OTP.')
+            return redirect(url_for('register'))
+
+        # Delete the OTP document from the collection
+        result = otp_collection.delete_one({"email": email})
+
 
         # Insert new user into MongoDB
         users_collection.insert_one({
