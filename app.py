@@ -368,24 +368,25 @@ def register():
         otp = request.form.get('otp')
 
         if not username or not email or not password:
-            flash('All fields are required!')
-            return redirect(url_for('register'))
+            return jsonify({'success': False, 'message': 'All fields are required!'})
 
         # Check if email already exists
         if users_collection.find_one({'email': email}):
-            flash('Email already exists! Please log in.')
-            return jsonify({'success': True, 'message': 'Email already exists! Please log in.'})
+            return jsonify({'success': False, 'message': 'Email already exists! Please log in.'})
 
+        # Retrieve OTP data for the email
         otp_data = otp_collection.find_one({"email": email})
 
-         # Check if otp_data is None
+        # Check if otp_data is None (OTP not found for the email)
         if otp_data is None:
-            flash('No OTP found for this email. Please request a new OTP.')
-            return redirect(url_for('register'))
+            return jsonify({'success': False, 'message': 'No OTP found for this email. Please request a new OTP.'})
+
+        # Ensure the OTP is correct
+        if otp_data["otp"] != int(otp):
+            return jsonify({'success': False, 'message': 'Invalid OTP.'})
 
         # Delete the OTP document from the collection
-        result = otp_collection.delete_one({"email": email})
-
+        otp_collection.delete_one({"email": email})
 
         # Insert new user into MongoDB
         users_collection.insert_one({
@@ -395,10 +396,10 @@ def register():
             'password': password  # Plain text for now as requested
         })
 
-        flash('Registration successful! Please log in.')
         return jsonify({'success': True, 'message': 'Registration successful! Please log in.'})
 
     return render_template('registration.html')
+
 
 # Route for user login
 @app.route('/login', methods=['GET', 'POST'])
