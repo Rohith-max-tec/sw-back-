@@ -403,6 +403,95 @@ def register():
 
     return render_template('registration.html')
 
+@app.route('/forget_password', methods=['GET', 'POST'])
+def forget_password():
+    if request.method == 'POST':
+        email = request.form.get('email')
+    if users_collection.find_one({'email': email}):
+        otp_collection.delete_one({"email": email})
+        otp=fsend_otp(email)
+        if otp is None:
+            return jsonify({'success': False, 'message': 'Failed to send OTP. Please try again.'})
+        else:
+            return jsonify({'success': True, 'message': 'OTP sent to your Email.Please check'})
+    return jsonify({'success': False, 'message': 'user not registred.Please register'})
+
+def fsend_otp(email):
+    otp = random.randint(100000, 999999)  # Generate a 6-digit OTP
+    message = f"Your OTP for Swaraksha registration is: {otp}"
+
+    # Email setup
+    sender_email = "rh0665971@gmail.com"
+    sender_password = "jgjr aysx ndto bxye"  # Ensure this is a Google App password
+
+    # Create the email message
+    msg = MIMEMultipart()
+    msg['From'] = sender_email
+    msg['To'] = email
+    msg['Subject'] = "OTP for password update in Swaraksha"
+    msg.attach(MIMEText(message, 'plain'))
+
+    try:
+        # Send email using SMTP
+        with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
+            server.login(sender_email, sender_password)
+            server.sendmail(sender_email, email, msg.as_string())
+
+        # Store OTP in MongoDB with an expiration time of 5 minutes
+        otp_data = {
+            "email": email,
+            "otp": otp,
+            "created_at": datetime.now(),
+            "expires_at": datetime.now() + timedelta(minutes=5)
+        }
+        otp_collection.insert_one(otp_data)
+        logging.info("OTP sent and saved successfully.")
+        return otp  # Return the OTP if successfully sent
+
+    except smtplib.SMTPException as e:
+        logging.error(f"Failed to send OTP: {e}")
+        return None  # Return None to indicate failure
+
+
+@app.route('/validate', methods=['GET', 'POST'])
+def validate():
+    if request.method == 'POST':
+        email = request.form.get('email')
+        Newpassword = request.form.get('password')
+        otp = request.form.get('otp')
+
+        if not email or not Newpassword or not otp:
+            return jsonify({'success': False, 'message': 'All fields are required!'})
+
+        # Check if email already exists
+        #if users_collection.find_one({'email': email}):
+            #return jsonify({'success': False, 'message': 'Email already exists! Please log in.'})
+
+        # Retrieve OTP data for the email
+        otp_data = otp_collection.find_one({"email": email})
+
+        # Check if otp_data is None (OTP not found for the email)
+        if otp_data is None:
+            return jsonify({'success': False, 'message': 'No OTP found for this email. Please request a new OTP.'})
+
+        # Ensure the OTP is correct
+        if otp_data["otp"] != int(otp):
+            return jsonify({'success': False, 'message': 'Invalid OTP.'})
+
+        # Delete the OTP document from the collection
+        otp_collection.delete_one({"email": email})
+
+        users_collection.update_one(
+            { 'email': email },
+            { '$set': { 'password': Newpassword } }
+        )
+
+        # Insert new user into MongoDB
+        
+
+        return jsonify({'success': True, 'message': 'New password updated successful! Please log in.'})
+
+    return render_template('forgetpassword.html')
 
 # Route for user login
 @app.route('/login', methods=['GET', 'POST'])
