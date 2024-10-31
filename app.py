@@ -118,13 +118,7 @@ def upload_image():
         encoded_image = base64.b64encode(image_file.read()).decode('utf-8')
     img_data = f"data:image/jpeg;base64,{encoded_image}"
 
-    # Insert the base64-encoded image into MongoDB
-    new_message = {
-        "message": img_data,
-        "type": "image"
-    }
-    messages_collection.insert_one(new_message)
-    logger.info(f"Image inserted into MongoDB as base64 data.")
+    
 
     # Resize image if dimensions exceed 1024x1024
     if img.shape[0] > 1024 or img.shape[1] > 1024:
@@ -154,6 +148,19 @@ def upload_image():
         total_faces = count_male + count_female
         logger.info(f'Number of males: {count_male}, Number of females: {count_female}, Total faces: {total_faces}')
 
+
+        # Insert the base64-encoded image into MongoDB
+        new_message = {
+            "message": img_data,
+            "male": count_male,
+            "female": count_female,
+            "total": total_faces,
+            "type": "image"
+            
+        }
+        messages_collection.insert_one(new_message)
+        logger.info(f"Image inserted into MongoDB as base64 data.")
+
         # Clean up interpreter and memory after each request
         interpreter = None
         gc.collect()
@@ -182,7 +189,11 @@ def get_messages():
     for msg in messages:
         message_data = {
             "username": msg.get('username', 'Image'),
+            "male" : msg.get('male','not found'),
+            "female" : msg.get('female','not found'),
+            "total" : msg.get('total','not found'),
             "type": msg.get('type', 'text'),
+            
         }
         if msg.get('type') == 'audio':
             message_data["filename"] = msg.get('filename')
