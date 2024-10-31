@@ -328,8 +328,12 @@ def send_otp(email):
     message = f"Your OTP for Swaraksha registration is: {otp}"
 
     # Email setup
-    sender_email = "rh0665971@gmail.com"
-    sender_password = "jgjr aysx ndto bxye"  # Ensure this is a Google App password
+    #sender_email = "rh0665971@gmail.com"
+    #sender_password = "jgjr aysx ndto bxye" # Ensure this is a Google App password
+
+    sender_email = "swaraksha247@gmail.com"
+    sender_password = "mvvh najj rbee tsfo"
+
 
     # Create the email message
     msg = MIMEMultipart()
@@ -421,8 +425,9 @@ def fsend_otp(email):
     message = f"Your OTP for Swaraksha registration is: {otp}"
 
     # Email setup
-    sender_email = "rh0665971@gmail.com"
-    sender_password = "jgjr aysx ndto bxye"  # Ensure this is a Google App password
+    sender_email = "swaraksha247@gmail.com"
+    sender_password = "mvvh najj rbee tsfo"
+    # Ensure this is a Google App password
 
     # Create the email message
     msg = MIMEMultipart()
