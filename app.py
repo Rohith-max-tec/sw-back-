@@ -181,7 +181,7 @@ def get_messages():
     messages_list = []
     for msg in messages:
         message_data = {
-            "username": msg.get('username', 'Anonymous'),
+            "username": msg.get('username', 'Image'),
             "type": msg.get('type', 'text'),
         }
         if msg.get('type') == 'audio':
