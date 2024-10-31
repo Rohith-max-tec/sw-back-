@@ -305,6 +305,7 @@ def get_otp():
         email = request.form.get('email')
         password = request.form.get('password')
 
+
         if not username or not email or not password:
             flash('All fields are required!')
             return redirect(url_for('register'))
@@ -312,6 +313,8 @@ def get_otp():
         # Check if email already exists
         if users_collection.find_one({'email': email}):
             return jsonify({'success': False, 'message': 'Email already exists! Please log in.'})
+
+        otp_collection.delete_one({"email": email})
 
         # Generate and store OTP
         otp=send_otp(email)
