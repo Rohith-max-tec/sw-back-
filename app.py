@@ -545,15 +545,20 @@ def nearest_police_station():
     data = request.get_json()
     latitude = data.get('latitude')
     longitude = data.get('longitude')
-
+    guardianNum = session.get('guardianNum','NF')
+    guardianNum = int(guardianNum)
+    
+    
     # Predict the nearest police station using the trained model
     try:
         nearest_police_station.nearest_station = en.inverse_transform(cls.predict([[latitude, longitude]]))
         contact_number = df1.loc[df1['Police_station_name'].str.contains(nearest_police_station.nearest_station[0], case=False, na=False), 'phone_number'].values[0]
         n = contact_number.replace('-', '')  # Clean number
+        
         return jsonify({
             'police_station': nearest_police_station.nearest_station[0],
             'contact_number': n  # Ensure you return the cleaned number
+            'guardianNum': guardianNum
         })
     except Exception as e:
         return jsonify({'error': str(e)})
