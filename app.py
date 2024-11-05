@@ -524,9 +524,11 @@ def login():
         if user and password == user['password']:
             session['username'] = user['username']
             session['mobile'] = user['mobile']
+            session['guardianNum'] = user['guardianNum']
+            
             session.permanent = True  # Set session as permanent
             logger.info(f"User {user['username']} logged in successfully.")
-            return jsonify({'success': True, 'username': user['username'], 'mobile': user['mobile']})
+            return jsonify({'success': True, 'username': user['username'], 'mobile': user['mobile'],'guardianNum': user['guardianNum']})
         else:
             return jsonify({'success': False, 'message': 'Invalid credentials!'})
 
