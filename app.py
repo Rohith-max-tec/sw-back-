@@ -545,23 +545,27 @@ def nearest_police_station():
     data = request.get_json()
     latitude = data.get('latitude')
     longitude = data.get('longitude')
-    guardianNum = session.get('guardianNum','NF')
-    guardianNum = int(guardianNum)
     
+    # Get guardian number from session, defaulting to 'NF' if not set
+    guardianNum = session.get('guardianNum', 'NF')
     
-    # Predict the nearest police station using the trained model
     try:
+        # Predict the nearest police station using the trained model
         nearest_police_station.nearest_station = en.inverse_transform(cls.predict([[latitude, longitude]]))
         contact_number = df1.loc[df1['Police_station_name'].str.contains(nearest_police_station.nearest_station[0], case=False, na=False), 'phone_number'].values[0]
-        n = contact_number.replace('-', '')  # Clean number
         
+        # Clean the contact number
+        n = contact_number.replace('-', '')  
+        
+        # Return the nearest police station details as JSON
         return jsonify({
             'police_station': nearest_police_station.nearest_station[0],
-            'contact_number': n,
+            'contact_number': n,   # Ensure cleaned contact number is returned
             'guardianNum': guardianNum
         })
     except Exception as e:
         return jsonify({'error': str(e)})
+
 
 @app.route('/distanceP', methods=['POST'])
 def distance_p():
