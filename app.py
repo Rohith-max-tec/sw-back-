@@ -555,7 +555,9 @@ def nearest_police_station():
         contact_number = df1.loc[df1['Police_station_name'].str.contains(nearest_police_station.nearest_station[0], case=False, na=False), 'phone_number'].values[0]
         
         # Clean the contact number
-        n = contact_number.replace('-', '')  
+        n = contact_number.replace('-', '') 
+        logger.info(f"police number is {contact_number} and type is {type(contact_number)}")
+        logger.info(f"Guardian number is {guardianNum} and type is {type(guardianNum)}")
         
         # Return the nearest police station details as JSON
         return jsonify({
