@@ -381,6 +381,7 @@ def register():
     if request.method == 'POST':
         username = request.form.get('username')
         mobile = request.form.get('mobile')
+        guardianNum=request.form.get('guardianNum')
         email = request.form.get('email')
         password = request.form.get('password')
         otp = request.form.get('otp')
@@ -410,6 +411,7 @@ def register():
         users_collection.insert_one({
             'username': username,
             'mobile': mobile,
+            'guardianNum' : guardianNum,
             'email': email,
             'password': password  # Plain text for now as requested
         })
