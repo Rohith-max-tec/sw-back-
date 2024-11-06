@@ -540,7 +540,7 @@ def add_guardianNum():
         if request.method == 'POST':
             email = request.form['email']
             guardianNum = request.form['guardianNum']
-            
+            logger.info(f'your email:{email} your guardianNum:{guardianNum}')
             # Ensure email and guardianNum are provided
             if not email or not guardianNum:
                 logger.info(f'no email{email} or guardianNum found {guardianNum}')
