@@ -534,19 +534,36 @@ def login():
             return jsonify({'success': False, 'message': 'Invalid credentials!'})
 
     return render_template('login.html')
-@app.route('/add_guardianNum', methods=['POST', 'GET'])
+@app.route('/add_guardianNum', methods=['POST'])
 def add_guardianNum():
-    if request.method == 'POST':
-        email=request.form['email']
-        guardianNum = request.form['guardianNum']
-        users_collection.update_one(
-            { 'email': email },
-            { '$set': { 'guardianNum': guardianNum } }
-        )
-        user = users_collection.find_one({'email': email})
-        guardianNum = user['guardianNum']
-        
-        return jsonify({'success': True, 'message': 'Saved Sucessfully','guardianNum' : guardianNum})
+    try:
+        if request.method == 'POST':
+            email = request.form['email']
+            guardianNum = request.form['guardianNum']
+            
+            # Ensure email and guardianNum are provided
+            if not email or not guardianNum:
+                logger.info(f'no email{email} or guardianNum found {guardianNum}')
+                return jsonify({'success': False, 'message': 'Email and Guardian Number are required'}), 400
+            
+            # Update the user's guardian number
+            result = users_collection.update_one(
+                {'email': email},
+                {'$set': {'guardianNum': guardianNum}}
+            )
+
+            if result.matched_count == 0:
+                return jsonify({'success': False, 'message': 'User not found'}), 404
+
+            # Retrieve the updated user document
+            user = users_collection.find_one({'email': email})
+            guardianNum = user.get('guardianNum')
+
+            return jsonify({'success': True, 'message': 'Saved Successfully', 'guardianNum': guardianNum})
+
+    except Exception as e:
+        print("Error occurred:", e)
+        return jsonify({'success': False, 'message': 'An error occurred, please try again later'}), 500
     
 # Logout route to clear the session
 @app.route('/logout', methods=['POST', 'GET'])
