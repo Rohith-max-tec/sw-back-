@@ -528,12 +528,26 @@ def login():
             
             session.permanent = True  # Set session as permanent
             logger.info(f"User {user['username']} logged in successfully.")
+          
             return jsonify({'success': True, 'username': user['username'], 'mobile': user['mobile'],'guardianNum': user['guardianNum']})
         else:
             return jsonify({'success': False, 'message': 'Invalid credentials!'})
 
     return render_template('login.html')
-
+@app.route('/add_guardianNum', methods=['POST', 'GET'])
+def add_guardianNum():
+    if request.method == 'POST':
+        email=request.form['email']
+        guardianNum = request.form['guardianNum']
+        users_collection.update_one(
+            { 'email': email },
+            { '$set': { 'guardianNum': guardianNum } }
+        )
+        user = users_collection.find_one({'email': email})
+        guardianNum = user['guardianNum']
+        
+        return jsonify({'success': True, 'message': 'Saved Sucessfully','guardianNum' : guardianNum})
+    
 # Logout route to clear the session
 @app.route('/logout', methods=['POST', 'GET'])
 def logout():
