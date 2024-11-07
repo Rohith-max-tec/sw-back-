@@ -605,7 +605,13 @@ def nearest_police_station():
         n = contact_number.replace('-', '') 
         logger.info(f"police number is {contact_number} and type is {type(contact_number)}")
         logger.info(f"Guardian number is {guardianNum} and type is {type(guardianNum)}")
-        
+
+        np=nearest_police_station.nearest_station[0]
+
+        station_data = df1[df1['Police_station_name'] == np]
+
+        latitude = station_data['latitude'].values[0]
+        longitude = station_data['longitude'].values[0]
         # Return the nearest police station details as JSON
         return jsonify({
             'police_station': nearest_police_station.nearest_station[0],
