@@ -610,7 +610,9 @@ def nearest_police_station():
         return jsonify({
             'police_station': nearest_police_station.nearest_station[0],
             'contact_number': n,   # Ensure cleaned contact number is returned
-            'guardianNum': guardianNum
+            'guardianNum': guardianNum,
+            'latitude': latitude,
+            'longitude':longitude
         })
     except Exception as e:
         return jsonify({'error': str(e)})
