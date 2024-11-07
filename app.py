@@ -564,7 +564,21 @@ def add_guardianNum():
     except Exception as e:
         print("Error occurred:", e)
         return jsonify({'success': False, 'message': 'An error occurred, please try again later'}), 500
+
+@app.route('/get_guardianNum', methods=['POST'])
+def get_guardianNum():
+    email = request.form.get('email')  # Retrieve email from POST request body
+    user = users_collection.find_one({'email': email})
     
+    if user and 'guardianNum' in user:
+        guardianNum = user.get('guardianNum')
+    else:
+        guardianNum = None
+    
+    return jsonify({'guardianNum': guardianNum})
+        
+    
+
 # Logout route to clear the session
 @app.route('/logout', methods=['POST', 'GET'])
 def logout():
