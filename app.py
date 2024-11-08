@@ -676,6 +676,33 @@ def get_crime_alert():
             crime_alert = df2['indicator'][i]
             break
     return jsonify({'alert': crime_alert})
+    
+CSV_FILE_PATH = 'customer_reviews.csv'
+@app.route('/submit_review', methods=['POST'])
+def submit_review():
+    # Get the JSON data from the request
+    data = request.json
+
+    # Extract data from the JSON payload
+    latitude = data.get('latitude')
+    longitude = data.get('longitude')
+    review_stars = data.get('review_stars')
+    review_text = data.get('review_text')
+
+    # Validate input data
+    if latitude is None or longitude is None or review_stars is None or review_text is None:
+        return jsonify({"error": "Missing data fields"}), 400
+
+    # Append the review to the CSV file
+    new_review = pd.DataFrame({
+        'latitude': [latitude],
+        'longitude': [longitude],
+        'review_stars': [review_stars],
+        'review_text': [review_text]
+    })
+    new_review.to_csv(CSV_FILE_PATH, mode='a', header=False, index=False)
+
+    return jsonify({"message": "Review submitted successfully!"}), 201
 
 # Additional emergency and utility routes (trimmed for brevity)
 
