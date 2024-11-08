@@ -677,9 +677,22 @@ def get_crime_alert():
             break
     return jsonify({'alert': crime_alert})
     
+# Define the path to the CSV file
 CSV_FILE_PATH = 'customer_reviews.csv'
+
+# Ensure the CSV file is initialized with the required columns
+def initialize_csv():
+    columns = ['latitude', 'longitude', 'review_stars', 'review_text']
+    df = pd.DataFrame(columns=columns)
+    df.to_csv(CSV_FILE_PATH, index=False)
+
+# Call this function once to ensure the CSV file exists
+
+
+# Route to accept review data from the frontend
 @app.route('/submit_review', methods=['POST'])
 def submit_review():
+    initialize_csv()
     # Get the JSON data from the request
     data = request.json
 
