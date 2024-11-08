@@ -684,7 +684,6 @@ def get_crime_alert():
 # Route to accept review data from the frontend
 @app.route('/submit_review', methods=['POST'])
 def submit_review():
-    
     # Get the JSON data from the request
     data = request.json
 
@@ -698,21 +697,20 @@ def submit_review():
     if latitude is None or longitude is None or review_stars is None or review_text is None:
         return jsonify({"error": "Missing data fields"}), 400
 
-
+    # Create the new message dictionary
     new_message = {
-            "latitude": latitude,
-            "longitude": longitude,
-            "review_stars": review_stars,
-            "review_text":review_text,
-            "type": "text"
-            
-        }
-        reviews.insert_one(new_message)
-
-    # Append the review to the CSV file
+        "latitude": latitude,
+        "longitude": longitude,
+        "review_stars": review_stars,
+        "review_text": review_text,
+        "type": "text"
+    }
     
+    # Insert the review into the MongoDB collection
+    reviews.insert_one(new_message)
 
     return jsonify({"message": "Review submitted successfully!"}), 201
+
 
 # Additional emergency and utility routes (trimmed for brevity)
 
