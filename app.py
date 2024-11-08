@@ -703,7 +703,7 @@ def submit_review():
             "latitude": latitude,
             "longitude": longitude,
             "review_stars": review_stars,
-            "review_text":review_text
+            "review_text":review_text,
             "type": "text"
             
         }
