@@ -65,6 +65,7 @@ db = client['swaraksha']
 users_collection = db['users']
 otp_collection = db['otp_storage']  
 messages_collection = db['messages']
+reviews = db['reviews']
 
 # Setup the uploads folder
 app.config['UPLOAD_FOLDER'] = 'uploads'
@@ -677,22 +678,13 @@ def get_crime_alert():
             break
     return jsonify({'alert': crime_alert})
     
-# Define the path to the CSV file
-CSV_FILE_PATH = 'customer_reviews.csv'
 
-# Ensure the CSV file is initialized with the required columns
-def initialize_csv():
-    columns = ['latitude', 'longitude', 'review_stars', 'review_text']
-    df = pd.DataFrame(columns=columns)
-    df.to_csv(CSV_FILE_PATH, index=False)
-
-# Call this function once to ensure the CSV file exists
 
 
 # Route to accept review data from the frontend
 @app.route('/submit_review', methods=['POST'])
 def submit_review():
-    initialize_csv()
+    
     # Get the JSON data from the request
     data = request.json
 
@@ -706,14 +698,19 @@ def submit_review():
     if latitude is None or longitude is None or review_stars is None or review_text is None:
         return jsonify({"error": "Missing data fields"}), 400
 
+
+    new_message = {
+            "latitude": latitude,
+            "longitude": longitude,
+            "review_stars": review_stars,
+            "review_text":review_text
+            "type": "text"
+            
+        }
+        reviews.insert_one(new_message)
+
     # Append the review to the CSV file
-    new_review = pd.DataFrame({
-        'latitude': [latitude],
-        'longitude': [longitude],
-        'review_stars': [review_stars],
-        'review_text': [review_text]
-    })
-    new_review.to_csv(CSV_FILE_PATH, mode='a', header=False, index=False)
+    
 
     return jsonify({"message": "Review submitted successfully!"}), 201
 
