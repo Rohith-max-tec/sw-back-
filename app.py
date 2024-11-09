@@ -711,6 +711,16 @@ def submit_review():
 
     return jsonify({"message": "Review submitted successfully!"}), 201
 
+@app.route('/get_reviews', methods=['POST', 'GET'])
+def get_reviews():
+    l=[]
+    doc=reviews.find()
+    for i in doc:
+        i['_id'] = str(i['_id'])
+        l.append(i)
+    return jsonify(l)
+    
+    
 
 # Additional emergency and utility routes (trimmed for brevity)
 
