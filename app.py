@@ -690,6 +690,7 @@ def submit_review():
     # Extract data from the JSON payload
     latitude = data.get('latitude')
     longitude = data.get('longitude')
+    username = data.get('username')
     review_stars = data.get('review_stars')
     review_text = data.get('review_text')
 
@@ -699,6 +700,7 @@ def submit_review():
 
     # Create the new message dictionary
     new_message = {
+        "username": username,
         "latitude": latitude,
         "longitude": longitude,
         "review_stars": review_stars,
