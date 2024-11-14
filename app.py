@@ -66,6 +66,7 @@ users_collection = db['users']
 otp_collection = db['otp_storage']  
 messages_collection = db['messages']
 reviews = db['reviews']
+App_reviews = db['App_reviews']
 
 # Setup the uploads folder
 app.config['UPLOAD_FOLDER'] = 'uploads'
@@ -722,7 +723,39 @@ def get_reviews():
         l.append(i)
     return jsonify(l)
     
+
+
+# Route to accept review data from the frontend
+@app.route('/App_review', methods=['POST'])
+def App_review():
+    # Get the JSON data from the request
+    data = request.json
+
+    # Extract data from the JSON payload
+    latitude = data.get('latitude')
+    longitude = data.get('longitude')
+    username = data.get('username')
+    review_stars = data.get('review_stars')
+    review_text = data.get('review_text')
+
+    # Validate input data
+    if latitude is None or longitude is None or review_stars is None or review_text is None:
+        return jsonify({"error": "Missing data fields"}), 400
+
+    # Create the new message dictionary
+    new_message = {
+        "username": username,
+        "latitude": latitude,
+        "longitude": longitude,
+        "review_stars": review_stars,
+        "review_text": review_text,
+        "type": "text"
+    }
     
+    # Insert the review into the MongoDB collection
+    App_reviews.insert_one(new_message)
+
+    return jsonify({"message": "Review submitted successfully!"}), 201
 
 # Additional emergency and utility routes (trimmed for brevity)
 
