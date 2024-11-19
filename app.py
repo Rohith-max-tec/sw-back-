@@ -260,7 +260,7 @@ def send_sos():
     address = data['address']
     username = data['username']
     mobile = data['mobile']
-    sos_message = f"Emergency! Please help me at (address: {address}, Latitude: {latitude}, Longitude: {longitude}, mobile: {mobile})"
+    sos_message = f"Emergency! Please help me at (address: {address}, Latitude: {latitude}, Longitude: {longitude}, mobile: {mobile}) or Track me in map https://www.google.com/maps?q={latitude},{longitude}"
     new_message = {
         "message": sos_message,
         "username": username,
