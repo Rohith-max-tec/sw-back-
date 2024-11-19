@@ -23,6 +23,7 @@ import random
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from datetime import datetime, timedelta
+import pytz
 
 
 
@@ -260,8 +261,12 @@ def send_sos():
     address = data['address']
     username = data['username']
     mobile = data['mobile']
-    current_timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    sos_message = f"Emergency! Please help me at (address: {address}, Latitude: {latitude}, Longitude: {longitude}, mobile: {mobile} Timestamp: {current_timestamp}) or Track me in map https://www.google.com/maps?q={latitude},{longitude}"
+    timezone = pytz.timezone('Asia/Kolkata')
+    current_timestamp = datetime.now(timezone).strftime("%Y-%m-%d %H:%M:%S")
+    sos_message = f"""
+    Emergency! Please help me at (Address: {address}, Latitude: {latitude}, Longitude: {longitude}, Mobile: {mobile}, Timestamp: {current_timestamp}) 
+    or Track me in map <a href="https://www.google.com/maps?q={latitude},{longitude}" target="_blank">Click here to view on map</a>
+    """
     new_message = {
         "message": sos_message,
         "username": username,
